@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soccer GTM Performance (Demo)</title>
+<style>
+:root{--bg:#f6f7f9;--card:#ffffff;--ink:#1d2433;--muted:#6b7385;--line:#e3e6ec;--accent:#1f6feb;--accent2:#7aa7f0;--warn:#b45309;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1420;--card:#171e2e;--ink:#e8ecf4;--muted:#9aa3b8;--line:#2a3347;--accent:#5b9cff;--accent2:#3b6fc4;--warn:#f59e0b;}}
+:root[data-theme="dark"]{--bg:#0f1420;--card:#171e2e;--ink:#e8ecf4;--muted:#9aa3b8;--line:#2a3347;--accent:#5b9cff;--accent2:#3b6fc4;--warn:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 40px}
+.banner{background:#fff4e0;color:#7a4a00;border:1px solid #f1d29a;padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:14px}
+:root[data-theme="dark"] .banner,@media (prefers-color-scheme: dark){}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);margin-bottom:16px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.seg button,.tabs button,.metric button{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:6px 12px;border-radius:999px;cursor:pointer;font:inherit}
+.seg button.on,.tabs button.on,.metric button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.grp{display:flex;gap:6px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.kpi .v{font-size:20px;font-weight:600;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:500;font-size:12px}
+tr.total td{font-weight:600;border-top:2px solid var(--line)}
+.row{display:grid;grid-template-columns:200px 1fr 90px;gap:10px;align-items:center;padding:5px 0}
+.row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{background:var(--line);border-radius:6px;height:14px;overflow:hidden}
+.fill{background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;border-radius:6px}
+.val{text-align:right;font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font-size:12px;margin-top:8px}
+.pos{color:#15803d}.neg{color:#b91c1c}
+td{font-variant-numeric:tabular-nums}
+@media (max-width:620px){.row{grid-template-columns:120px 1fr 80px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">Demo view. All figures are synthetic and do not reflect any real business data.</div>
+  <h1>Soccer GTM Performance</h1>
+  <div class="sub">Example period · Settled bets · Trading margin · Synthetic data</div>
+
+  <div class="bar">
+    <div class="grp seg" id="seg"></div>
+    <div class="grp tabs" id="tabs" style="margin-left:auto"></div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+  <div id="content"></div>
+</div>
+
+<script>
+const DATA = {
+ "segments": {
+  "Total": {
+   "total": {
+    "handle": 48000000.0,
+    "ggr": 2795520.0,
+    "legs": 533333.3333333334,
+    "bets": 330666.6666666666,
+    "actives": 84000,
+    "matches": 409,
+    "margin": 0.05824
+   },
+   "markets": {
+    "Match Result": {
+     "handle": 18240000.0,
+     "ggr": 932064.0,
+     "margin": 0.052,
+     "legs": 202666.66666666666,
+     "bets": 125653.33333333333,
+     "live": 5472000.0
+    },
+    "Total Goals": {
+     "handle": 7680000.0,
+     "ggr": 438528.00000000006,
+     "margin": 0.058,
+     "legs": 85333.33333333333,
+     "bets": 52906.66666666666,
+     "live": 1920000.0
+    },
+    "Both Teams to Score": {
+     "handle": 4320000.0,
+     "ggr": 233712.0,
+     "margin": 0.055,
+     "legs": 48000.0,
+     "bets": 29760.0,
+     "live": 950400.0
+    },
+    "Player Props": {
+     "handle": 3840000.0,
+     "ggr": 269184.0,
+     "margin": 0.071,
+     "legs": 42666.666666666664,
+     "bets": 26453.33333333333,
+     "live": 460800.0
+    },
+    "Team Goals": {
+     "handle": 2880000.0,
+     "ggr": 170208.0,
+     "margin": 0.06,
+     "legs": 32000.0,
+     "bets": 19840.0,
+     "live": 518400.0
+    },
+    "Half-Time Markets": {
+     "handle": 2400000.0,
+     "ggr": 149040.0,
+     "margin": 0.063,
+     "legs": 26666.666666666668,
+     "bets": 16533.333333333336,
+     "live": 480000.0
+    },
+    "Correct Score": {
+     "handle": 1920000.0,
+     "ggr": 169152.0,
+     "margin": 0.089,
+     "legs": 21333.333333333332,
+     "bets": 13226.666666666664,
+     "live": 192000.0
+    },
+    "Corners & Cards": {
+     "handle": 2400000.0,
+     "ggr": 156240.0,
+     "margin": 0.066,
+     "legs": 26666.666666666668,
+     "bets": 16533.333333333336,
+     "live": 840000.0
+    },
+    "Spread": {
+     "handle": 1920000.0,
+     "ggr": 101952.0,
+     "margin": 0.054,
+     "legs": 21333.333333333332,
+     "bets": 13226.666666666664,
+     "live": 384000.0
+    },
+    "Other": {
+     "handle": 2400000.0,
+     "ggr": 175440.0,
+     "margin": 0.074,
+     "legs": 26666.666666666668,
+     "bets": 16533.333333333336,
+     "live": 360000.0
+    }
+   },
+   "tournaments": {
+    "Premier League": {
+     "region": "England",
+     "handle": 10560000.0,
+     "ggr": 624096.0,
+     "margin": 0.06,
+     "legs": 117333.33333333333,
+     "bets": 72746.66666666666
+    },
+    "La Liga": {
+     "region": "Spain",
+     "handle": 6720000.0,
+     "ggr": 397152.0,
+     "margin": 0.06,
+     "legs": 74666.66666666667,
+     "bets": 46293.333333333336
+    },
+    "Serie A": {
+     "region": "Italy",
+     "handle": 5280000.0,
+     "ggr": 312048.0,
+     "margin": 0.06,
+     "legs": 58666.666666666664,
+     "bets": 36373.33333333333
+    },
+    "Bundesliga": {
+     "region": "Germany",
+     "handle": 4320000.0,
+     "ggr": 255312.0,
+     "margin": 0.06,
+     "legs": 48000.0,
+     "bets": 29760.0
+    },
+    "Ligue 1": {
+     "region": "France",
+     "handle": 2880000.0,
+     "ggr": 170208.0,
+     "margin": 0.06,
+     "legs": 32000.0,
+     "bets": 19840.0
+    },
+    "UEFA Champions League": {
+     "region": "UEFA",
+     "handle": 5760000.0,
+     "ggr": 340416.0,
+     "margin": 0.06,
+     "legs": 64000.0,
+     "bets": 39680.0
+    },
+    "FIFA World Cup": {
+     "region": "International",
+     "handle": 3840000.0,
+     "ggr": 226944.0,
+     "margin": 0.06,
+     "legs": 42666.666666666664,
+     "bets": 26453.33333333333
+    },
+    "MLS": {
+     "region": "US",
+     "handle": 2880000.0,
+     "ggr": 170208.0,
+     "margin": 0.06,
+     "legs": 32000.0,
+     "bets": 19840.0
+    },
+    "Liga MX": {
+     "region": "North America ex-US",
+     "handle": 2400000.0,
+     "ggr": 141840.0,
+     "margin": 0.06,
+     "legs": 26666.666666666668,
+     "bets": 16533.333333333336
+    },
+    "J1 League": {
+     "region": "Asia",
+     "handle": 1920000.0,
+     "ggr": 113472.0,
+     "margin": 0.06,
+     "legs": 21333.333333333332,
+     "bets": 13226.666666666664
+    },
+    "Other competitions": {
+     "region": "Other",
+     "handle": 1440000.0,
+     "ggr": 85104.0,
+     "margin": 0.06,
+     "legs": 16000.0,
+     "bets": 9920.0
+    }
+   }
+  },
+  "Ex-sharp": {
+   "total": {
+    "handle": 46560000.0,
+    "ggr": 2753558.4,
+    "legs": 517333.3333333333,
+    "bets": 320746.6666666666,
+    "actives": 82320,
+    "matches": 401,
+    "margin": 0.05914
+   },
+   "markets": {
+    "Match Result": {
+     "handle": 17692800.0,
+     "ggr": 920025.6,
+     "margin": 0.052,
+     "legs": 196586.66666666666,
+     "bets": 121883.73333333332,
+     "live": 5307840.0
+    },
+    "Total Goals": {
+     "handle": 7449600.0,
+     "ggr": 432076.80000000005,
+     "margin": 0.058,
+     "legs": 82773.33333333333,
+     "bets": 51319.46666666666,
+     "live": 1862400.0
+    },
+    "Both Teams to Score": {
+     "handle": 4190400.0,
+     "ggr": 230472.0,
+     "margin": 0.055,
+     "legs": 46560.0,
+     "bets": 28867.2,
+     "live": 921888.0
+    },
+    "Player Props": {
+     "handle": 3724800.0,
+     "ggr": 264460.8,
+     "margin": 0.071,
+     "legs": 41386.666666666664,
+     "bets": 25659.73333333333,
+     "live": 446976.0
+    },
+    "Team Goals": {
+     "handle": 2793600.0,
+     "ggr": 167616.0,
+     "margin": 0.06,
+     "legs": 31040.0,
+     "bets": 19244.8,
+     "live": 502848.0
+    },
+    "Half-Time Markets": {
+     "handle": 2328000.0,
+     "ggr": 146664.0,
+     "margin": 0.063,
+     "legs": 25866.666666666668,
+     "bets": 16037.333333333334,
+     "live": 465600.0
+    },
+    "Correct Score": {
+     "handle": 1862400.0,
+     "ggr": 165753.6,
+     "margin": 0.089,
+     "legs": 20693.333333333332,
+     "bets": 12829.866666666665,
+     "live": 186240.0
+    },
+    "Corners & Cards": {
+     "handle": 2328000.0,
+     "ggr": 153648.0,
+     "margin": 0.066,
+     "legs": 25866.666666666668,
+     "bets": 16037.333333333334,
+     "live": 814800.0
+    },
+    "Spread": {
+     "handle": 1862400.0,
+     "ggr": 100569.6,
+     "margin": 0.054,
+     "legs": 20693.333333333332,
+     "bets": 12829.866666666665,
+     "live": 372480.0
+    },
+    "Other": {
+     "handle": 2328000.0,
+     "ggr": 172272.0,
+     "margin": 0.074,
+     "legs": 25866.666666666668,
+     "bets": 16037.333333333334,
+     "live": 349200.0
+    }
+   },
+   "tournaments": {
+    "Premier League": {
+     "region": "England",
+     "handle": 10243200.0,
+     "ggr": 614592.0,
+     "margin": 0.06,
+     "legs": 113813.33333333333,
+     "bets": 70564.26666666666
+    },
+    "La Liga": {
+     "region": "Spain",
+     "handle": 6518400.0,
+     "ggr": 391104.0,
+     "margin": 0.06,
+     "legs": 72426.66666666667,
+     "bets": 44904.53333333333
+    },
+    "Serie A": {
+     "region": "Italy",
+     "handle": 5121600.0,
+     "ggr": 307296.0,
+     "margin": 0.06,
+     "legs": 56906.666666666664,
+     "bets": 35282.13333333333
+    },
+    "Bundesliga": {
+     "region": "Germany",
+     "handle": 4190400.0,
+     "ggr": 251424.0,
+     "margin": 0.06,
+     "legs": 46560.0,
+     "bets": 28867.2
+    },
+    "Ligue 1": {
+     "region": "France",
+     "handle": 2793600.0,
+     "ggr": 167616.0,
+     "margin": 0.06,
+     "legs": 31040.0,
+     "bets": 19244.8
+    },
+    "UEFA Champions League": {
+     "region": "UEFA",
+     "handle": 5587200.0,
+     "ggr": 335232.0,
+     "margin": 0.06,
+     "legs": 62080.0,
+     "bets": 38489.6
+    },
+    "FIFA World Cup": {
+     "region": "International",
+     "handle": 3724800.0,
+     "ggr": 223488.0,
+     "margin": 0.06,
+     "legs": 41386.666666666664,
+     "bets": 25659.73333333333
+    },
+    "MLS": {
+     "region": "US",
+     "handle": 2793600.0,
+     "ggr": 167616.0,
+     "margin": 0.06,
+     "legs": 31040.0,
+     "bets": 19244.8
+    },
+    "Liga MX": {
+     "region": "North America ex-US",
+     "handle": 2328000.0,
+     "ggr": 139680.0,
+     "margin": 0.06,
+     "legs": 25866.666666666668,
+     "bets": 16037.333333333334
+    },
+    "J1 League": {
+     "region": "Asia",
+     "handle": 1862400.0,
+     "ggr": 111744.0,
+     "margin": 0.06,
+     "legs": 20693.333333333332,
+     "bets": 12829.866666666665
+    },
+    "Other competitions": {
+     "region": "Other",
+     "handle": 1396800.0,
+     "ggr": 83808.0,
+     "margin": 0.06,
+     "legs": 15520.0,
+     "bets": 9622.4
+    }
+   }
+  },
+  "Sharp": {
+   "total": {
+    "handle": 1440000.0,
+    "ggr": 41961.6,
+    "legs": 16000.0,
+    "bets": 9920.0,
+    "actives": 1680,
+    "matches": 8,
+    "margin": 0.02914
+   },
+   "markets": {
+    "Match Result": {
+     "handle": 547200.0,
+     "ggr": 12038.4,
+     "margin": 0.022,
+     "legs": 6080.0,
+     "bets": 3769.6,
+     "live": 164160.0
+    },
+    "Total Goals": {
+     "handle": 230400.0,
+     "ggr": 6451.200000000001,
+     "margin": 0.028000000000000004,
+     "legs": 2560.0,
+     "bets": 1587.2,
+     "live": 57600.0
+    },
+    "Both Teams to Score": {
+     "handle": 129600.0,
+     "ggr": 3240.0,
+     "margin": 0.025,
+     "legs": 1440.0,
+     "bets": 892.8,
+     "live": 28512.0
+    },
+    "Player Props": {
+     "handle": 115200.0,
+     "ggr": 4723.2,
+     "margin": 0.040999999999999995,
+     "legs": 1280.0,
+     "bets": 793.6,
+     "live": 13824.0
+    },
+    "Team Goals": {
+     "handle": 86400.0,
+     "ggr": 2592.0,
+     "margin": 0.03,
+     "legs": 960.0,
+     "bets": 595.2,
+     "live": 15552.0
+    },
+    "Half-Time Markets": {
+     "handle": 72000.0,
+     "ggr": 2376.0,
+     "margin": 0.033,
+     "legs": 800.0,
+     "bets": 496.0,
+     "live": 14400.0
+    },
+    "Correct Score": {
+     "handle": 57600.0,
+     "ggr": 3398.3999999999996,
+     "margin": 0.059,
+     "legs": 640.0,
+     "bets": 396.8,
+     "live": 5760.0
+    },
+    "Corners & Cards": {
+     "handle": 72000.0,
+     "ggr": 2592.0000000000005,
+     "margin": 0.036000000000000004,
+     "legs": 800.0,
+     "bets": 496.0,
+     "live": 25200.0
+    },
+    "Spread": {
+     "handle": 57600.0,
+     "ggr": 1382.4,
+     "margin": 0.024,
+     "legs": 640.0,
+     "bets": 396.8,
+     "live": 11520.0
+    },
+    "Other": {
+     "handle": 72000.0,
+     "ggr": 3168.0,
+     "margin": 0.044,
+     "legs": 800.0,
+     "bets": 496.0,
+     "live": 10800.0
+    }
+   },
+   "tournaments": {
+    "Premier League": {
+     "region": "England",
+     "handle": 316800.0,
+     "ggr": 9504.0,
+     "margin": 0.03,
+     "legs": 3520.0,
+     "bets": 2182.4
+    },
+    "La Liga": {
+     "region": "Spain",
+     "handle": 201600.0,
+     "ggr": 6048.0,
+     "margin": 0.03,
+     "legs": 2240.0,
+     "bets": 1388.8
+    },
+    "Serie A": {
+     "region": "Italy",
+     "handle": 158400.0,
+     "ggr": 4752.0,
+     "margin": 0.03,
+     "legs": 1760.0,
+     "bets": 1091.2
+    },
+    "Bundesliga": {
+     "region": "Germany",
+     "handle": 129600.0,
+     "ggr": 3888.0,
+     "margin": 0.03,
+     "legs": 1440.0,
+     "bets": 892.8
+    },
+    "Ligue 1": {
+     "region": "France",
+     "handle": 86400.0,
+     "ggr": 2592.0,
+     "margin": 0.03,
+     "legs": 960.0,
+     "bets": 595.2
+    },
+    "UEFA Champions League": {
+     "region": "UEFA",
+     "handle": 172800.0,
+     "ggr": 5184.0,
+     "margin": 0.03,
+     "legs": 1920.0,
+     "bets": 1190.4
+    },
+    "FIFA World Cup": {
+     "region": "International",
+     "handle": 115200.0,
+     "ggr": 3456.0,
+     "margin": 0.03,
+     "legs": 1280.0,
+     "bets": 793.6
+    },
+    "MLS": {
+     "region": "US",
+     "handle": 86400.0,
+     "ggr": 2592.0,
+     "margin": 0.03,
+     "legs": 960.0,
+     "bets": 595.2
+    },
+    "Liga MX": {
+     "region": "North America ex-US",
+     "handle": 72000.0,
+     "ggr": 2160.0,
+     "margin": 0.03,
+     "legs": 800.0,
+     "bets": 496.0
+    },
+    "J1 League": {
+     "region": "Asia",
+     "handle": 57600.0,
+     "ggr": 1728.0,
+     "margin": 0.03,
+     "legs": 640.0,
+     "bets": 396.8
+    },
+    "Other competitions": {
+     "region": "Other",
+     "handle": 43200.0,
+     "ggr": 1296.0,
+     "margin": 0.03,
+     "legs": 480.0,
+     "bets": 297.6
+    }
+   }
+  }
+ },
+ "deciles": [
+  {
+   "band": "Top 100",
+   "customers": 100,
+   "handle": 10560000.0,
+   "margin": 0.041,
+   "ggr": 432960.0
+  },
+  {
+   "band": "Decile 10",
+   "customers": 84,
+   "handle": 22080000.0,
+   "margin": 0.045,
+   "ggr": 993600.0
+  },
+  {
+   "band": "Decile 9",
+   "customers": 336,
+   "handle": 8640000.0,
+   "margin": 0.049,
+   "ggr": 423360.0
+  },
+  {
+   "band": "Decile 8",
+   "customers": 672,
+   "handle": 5280000.0,
+   "margin": 0.053,
+   "ggr": 279840.0
+  },
+  {
+   "band": "Decile 7",
+   "customers": 1260,
+   "handle": 3360000.0000000005,
+   "margin": 0.056999999999999995,
+   "ggr": 191520.0
+  },
+  {
+   "band": "Decile 6",
+   "customers": 2520,
+   "handle": 2400000.0,
+   "margin": 0.061,
+   "ggr": 146400.0
+  },
+  {
+   "band": "Decile 5",
+   "customers": 5040,
+   "handle": 1920000.0,
+   "margin": 0.065,
+   "ggr": 124800.0
+  },
+  {
+   "band": "Decile 4",
+   "customers": 9240,
+   "handle": 1440000.0,
+   "margin": 0.069,
+   "ggr": 99360.00000000001
+  },
+  {
+   "band": "Decile 3",
+   "customers": 14280,
+   "handle": 1440000.0,
+   "margin": 0.073,
+   "ggr": 105120.0
+  },
+  {
+   "band": "Decile 2",
+   "customers": 21000,
+   "handle": 960000.0,
+   "margin": 0.077,
+   "ggr": 73920.0
+  },
+  {
+   "band": "Decile 1",
+   "customers": 30240,
+   "handle": 480000.0,
+   "margin": 0.081,
+   "ggr": 38880.0
+  }
+ ],
+ "regions": {
+  "Premier League": "England",
+  "La Liga": "Spain",
+  "Serie A": "Italy",
+  "Bundesliga": "Germany",
+  "Ligue 1": "France",
+  "UEFA Champions League": "UEFA",
+  "FIFA World Cup": "International",
+  "MLS": "US",
+  "Liga MX": "North America ex-US",
+  "J1 League": "Asia",
+  "Other competitions": "Other"
+ },
+ "yoy": {
+  "bands": [
+   "Top 100",
+   "Decile 10",
+   "Decile 9",
+   "Decile 8",
+   "Decile 7",
+   "Decile 6",
+   "Decile 5",
+   "Decile 4",
+   "Decile 3",
+   "Decile 2",
+   "Decile 1",
+   "Not active"
+  ],
+  "matrix": [
+   [
+    68,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    30
+   ],
+   [
+    2,
+    56,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    24
+   ],
+   [
+    0,
+    9,
+    232,
+    6,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    89
+   ],
+   [
+    0,
+    0,
+    17,
+    477,
+    12,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    165
+   ],
+   [
+    0,
+    0,
+    0,
+    32,
+    918,
+    23,
+    0,
+    0,
+    0,
+    0,
+    0,
+    287
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    62,
+    1885,
+    44,
+    0,
+    0,
+    0,
+    0,
+    529
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    120,
+    3867,
+    86,
+    0,
+    0,
+    0,
+    968
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    213,
+    7266,
+    152,
+    0,
+    0,
+    1608
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    320,
+    11504,
+    228,
+    0,
+    2228
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    456,
+    17321,
+    326,
+    2898
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    635,
+    25976,
+    3629
+   ]
+  ],
+  "rows": [
+   {
+    "band": "Top 100",
+    "ly_customers": 100,
+    "cy_customers": 70,
+    "ly_handle": 10560000.0,
+    "cy_handle": 10729735.27614758,
+    "change_pct": 0.016073416301854146,
+    "contrib_pts": 0.002898484906891731,
+    "share_of_change": 0.04830808178152885
+   },
+   {
+    "band": "Decile 10",
+    "ly_customers": 84,
+    "cy_customers": 67,
+    "ly_handle": 22080000.0,
+    "cy_handle": 21807900.068991885,
+    "change_pct": -0.012323366440584937,
+    "contrib_pts": -0.0046465152153025175,
+    "share_of_change": -0.07744192025504196
+   },
+   {
+    "band": "Decile 9",
+    "ly_customers": 336,
+    "cy_customers": 251,
+    "ly_handle": 8640000.0,
+    "cy_handle": 9062111.949854543,
+    "change_pct": 0.04885554975168327,
+    "contrib_pts": 0.00720819586500245,
+    "share_of_change": 0.12013659775004082
+   },
+   {
+    "band": "Decile 8",
+    "ly_customers": 672,
+    "cy_customers": 515,
+    "ly_handle": 5280000.0,
+    "cy_handle": 6040019.237036605,
+    "change_pct": 0.1439430373175389,
+    "contrib_pts": 0.012978470577810885,
+    "share_of_change": 0.21630784296351474
+   },
+   {
+    "band": "Decile 7",
+    "ly_customers": 1260,
+    "cy_customers": 992,
+    "ly_handle": 3360000.0000000005,
+    "cy_handle": 3982240.6554259537,
+    "change_pct": 0.18519067125772415,
+    "contrib_pts": 0.01062569425249237,
+    "share_of_change": 0.17709490420820617
+   },
+   {
+    "band": "Decile 6",
+    "ly_customers": 2520,
+    "cy_customers": 2028,
+    "ly_handle": 2400000.0,
+    "cy_handle": 2994595.9905752405,
+    "change_pct": 0.2477483294063502,
+    "contrib_pts": 0.010153620057637303,
+    "share_of_change": 0.1692270009606217
+   },
+   {
+    "band": "Decile 5",
+    "ly_customers": 5040,
+    "cy_customers": 4124,
+    "ly_handle": 1920000.0,
+    "cy_handle": 2334247.996007315,
+    "change_pct": 0.21575416458714317,
+    "contrib_pts": 0.007073907035644038,
+    "share_of_change": 0.11789845059406731
+   },
+   {
+    "band": "Decile 4",
+    "ly_customers": 9240,
+    "cy_customers": 7672,
+    "ly_handle": 1440000.0,
+    "cy_handle": 1621637.8618032648,
+    "change_pct": 0.126137404030045,
+    "contrib_pts": 0.0031017394433617627,
+    "share_of_change": 0.051695657389362715
+   },
+   {
+    "band": "Decile 3",
+    "ly_customers": 14280,
+    "cy_customers": 12112,
+    "ly_handle": 1440000.0,
+    "cy_handle": 1708833.938128854,
+    "change_pct": 0.1866902348117041,
+    "contrib_pts": 0.00459074347897633,
+    "share_of_change": 0.07651239131627217
+   },
+   {
+    "band": "Decile 2",
+    "ly_customers": 21000,
+    "cy_customers": 18184,
+    "ly_handle": 960000.0,
+    "cy_handle": 1179259.358493477,
+    "change_pct": 0.22839516509737198,
+    "contrib_pts": 0.0037441830343831473,
+    "share_of_change": 0.062403050573052454
+   },
+   {
+    "band": "Decile 1",
+    "ly_customers": 30240,
+    "cy_customers": 26302,
+    "ly_handle": 480000.0,
+    "cy_handle": 613017.6675352802,
+    "change_pct": 0.2771201406985005,
+    "contrib_pts": 0.002271476563102463,
+    "share_of_change": 0.03785794271837438
+   }
+  ],
+  "total_change_pct": 0.06000000000000005,
+  "ly_handle": 58560000.0,
+  "cy_handle": 62073600.0
+ }
+};
+const SEGS = ["Total", "Ex-sharp", "Sharp"];
+const TABS = ["Overall", "Market groups", "Tournaments", "Micro & live", "Deciles", "Movement"];
+let seg = "Total", tab = "Overall", metric = "handle";
+const METRICS = {handle:"Handle", ggr:"GGR", margin:"Margin", legs:"Legs", bets:"Bets"};
+
+const fmtMoney = v => "$" + (v >= 1e6 ? (v/1e6).toFixed(1) + "M" : Math.round(v/1e3) + "K");
+const fmtNum = v => Math.round(v).toLocaleString();
+const fmtPct = v => (v*100).toFixed(1) + "%";
+const fmt = (k, v) => k === "margin" ? fmtPct(v) : (k === "handle" || k === "ggr") ? fmtMoney(v) : fmtNum(v);
+
+function el(id){ return document.getElementById(id); }
+
+function renderChrome(){
+  el("seg").innerHTML = SEGS.map(s => `<button class="${s===seg?'on':''}" data-s="${s}">${s}</button>`).join("");
+  el("tabs").innerHTML = TABS.map(t => `<button class="${t===tab?'on':''}" data-t="${t}">${t}</button>`).join("");
+  el("seg").querySelectorAll("button").forEach(b => b.onclick = () => { seg = b.dataset.s; render(); });
+  el("tabs").querySelectorAll("button").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+}
+
+function kpis(){
+  const t = DATA.segments[seg].total;
+  const tiles = [["Handle", fmtMoney(t.handle)], ["GGR", fmtMoney(t.ggr)], ["Margin", fmtPct(t.margin)],
+                 ["Legs", fmtNum(t.legs)], ["Bets", fmtNum(t.bets)], ["Actives", fmtNum(t.actives)]];
+  el("kpis").innerHTML = tiles.map(([l,v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("");
+}
+
+function metricPicker(){
+  return `<div class="grp metric" style="margin-bottom:10px">` +
+    Object.entries(METRICS).map(([k,l]) => `<button class="${k===metric?'on':''}" data-m="${k}">${l}</button>`).join("") + `</div>`;
+}
+
+function bars(rows){
+  const max = Math.max(...rows.map(r => r.v));
+  return rows.map(r => `<div class="row"><div class="name" title="${r.name}">${r.name}</div>
+     <div class="track"><div class="fill" style="width:${(r.v/max*100).toFixed(1)}%"></div></div>
+     <div class="val">${fmt(metric, r.v)}</div></div>`).join("");
+}
+
+function wireMetric(){
+  document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { metric = b.dataset.m; render(); });
+}
+
+function table(rows, total){
+  const head = `<tr><th>Group</th><th>Handle</th><th>GGR</th><th>Margin</th><th>Legs</th><th>Bets</th></tr>`;
+  const body = rows.map(r => `<tr><td>${r.name}</td><td>${fmtMoney(r.handle)}</td><td>${fmtMoney(r.ggr)}</td>
+     <td>${fmtPct(r.margin)}</td><td>${fmtNum(r.legs)}</td><td>${fmtNum(r.bets)}</td></tr>`).join("");
+  const t = total;
+  return `<table>${head}${body}<tr class="total"><td>Total</td><td>${fmtMoney(t.handle)}</td><td>${fmtMoney(t.ggr)}</td>
+     <td>${fmtPct(t.margin)}</td><td>${fmtNum(t.legs)}</td><td>${fmtNum(t.bets)}</td></tr></table>`;
+}
+
+function overall(){
+  const s = DATA.segments[seg];
+  const rows = Object.entries(s.markets).map(([name, m]) => ({name, ...m})).sort((a,b) => b.handle - a.handle);
+  const ts = Object.entries(s.tournaments).map(([name, m]) => ({name, ...m})).sort((a,b) => b.handle - a.handle);
+  return `<div class="card"><h2>Handle by market group</h2>${metricPicker()}
+    ${bars(rows.map(r => ({name: r.name, v: r[metric]})))}</div>
+    <div class="card"><h2>Top tournaments</h2>${metricPicker()}
+    ${bars(ts.slice(0,6).map(r => ({name: r.name, v: r[metric]})))}</div>`;
+}
+
+function marketTab(){
+  const s = DATA.segments[seg];
+  const rows = Object.entries(s.markets).map(([name, m]) => ({name, ...m})).sort((a,b) => b.handle - a.handle);
+  return `<div class="card"><h2>Market groups</h2>${table(rows, s.total)}
+    <div class="note">Each group uses the same definitions as the main report: handle is net stake, bets count parlays once, margin is GGR plus promo costs over gross stake.</div></div>`;
+}
+
+function tournamentTab(){
+  const s = DATA.segments[seg];
+  const rows = Object.entries(s.tournaments).map(([name, m]) => ({name: `${name} · ${m.region}`, ...m}))
+    .sort((a,b) => b.handle - a.handle);
+  return `<div class="card"><h2>Tournaments</h2>${table(rows, s.total)}</div>`;
+}
+
+function microTab(){
+  const s = DATA.segments[seg];
+  const rows = Object.entries(s.markets).map(([name, m]) => {
+    const live = m.live, pre = m.handle - m.live;
+    return {name, live, pre, liveShare: live / m.handle};
+  }).sort((a,b) => b.live - a.live);
+  const r = rows.map(x => `<tr><td>${x.name}</td><td>${fmtMoney(x.pre)}</td><td>${fmtMoney(x.live)}</td><td>${fmtPct(x.liveShare)}</td></tr>`).join("");
+  return `<div class="card"><h2>Live vs pre-live handle</h2>
+    <table><tr><th>Market group</th><th>Pre-live</th><th>Live</th><th>Live share</th></tr>${r}</table>
+    <div class="note">Live is the in-play flag on each leg. Micro markets are shown by group; this demo does not split them out.</div></div>`;
+}
+
+const signed = v => (v >= 0 ? "+" : "") + v.toFixed(1);
+function decileTab(){
+  const y = DATA.yoy;
+  const totalChange = y.total_change_pct * 100;
+  const r = y.rows.map(x => {
+    const chg = x.change_pct * 100;
+    const cls = chg >= 0 ? "pos" : "neg";
+    return `<tr><td>${x.band}</td><td>${fmtNum(x.ly_customers)}</td><td>${fmtNum(x.cy_customers)}</td>
+      <td>${fmtMoney(x.ly_handle)}</td><td>${fmtMoney(x.cy_handle)}</td>
+      <td class="${cls}">${signed(chg)}%</td>
+      <td class="${cls}">${signed(x.contrib_pts * 100)} pts</td>
+      <td>${fmtPct(x.share_of_change)}</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2>Deciles: LY vs CY and contribution to change</h2>
+    <table><tr><th>Band</th><th>LY customers</th><th>CY customers</th><th>LY handle</th><th>CY handle</th>
+      <th>Change</th><th>Contribution</th><th>Share of change</th></tr>${r}
+      <tr class="total"><td>Total</td><td>${fmtNum(y.rows.reduce((a,b)=>a+b.ly_customers,0))}</td>
+      <td>${fmtNum(y.rows.reduce((a,b)=>a+b.cy_customers,0))}</td><td>${fmtMoney(y.ly_handle)}</td>
+      <td>${fmtMoney(y.cy_handle)}</td><td class="${totalChange>=0?'pos':'neg'}">${signed(totalChange)}%</td>
+      <td>${signed(totalChange)} pts</td><td>100.0%</td></tr></table>
+    <div class="note">Contribution is each band's change in handle as points of last year's total, so the column sums to the overall change. Share of change sums to 100% and shows which bands drove the movement. Customers in the Not active column in CY are not counted in any CY band.</div></div>`;
+}
+
+function movementTab(){
+  const y = DATA.yoy;
+  const n = y.bands.length;
+  const rowTotals = y.matrix.map(r => r.reduce((a,b)=>a+b,0));
+  const head = `<tr><th>LY band \\ CY band</th>${y.bands.map(b => `<th>${b}</th>`).join("")}<th>Total</th></tr>`;
+  const body = y.matrix.map((row, i) => {
+    const cells = row.map((v, j) => {
+      const pct = rowTotals[i] ? v / rowTotals[i] : 0;
+      const alpha = (pct * 0.85).toFixed(2);
+      return `<td style="background:rgba(31,111,235,${alpha});color:${pct>0.5?'#fff':'inherit'}" title="${fmtNum(v)} customers">${fmtPct(pct)}</td>`;
+    }).join("");
+    return `<tr><td>${y.bands[i]}</td>${cells}<td>${fmtNum(rowTotals[i])}</td></tr>`;
+  }).join("");
+  return `<div class="card"><h2>Movement: LY band to CY band</h2>
+    <div class="note" style="margin:0 0 8px">Each row shows where last year's customers in that band ended up this year, as a share of the row. The diagonal is customers who stayed in their band. Moves above the diagonal are customers who moved to a higher band.</div>
+    <div style="overflow-x:auto"><table style="font-size:12px"><thead>${head}</thead><tbody>${body}</tbody></table></div>
+    <div class="note">Counts are dummy. Hover a cell for the customer count.</div></div>`;
+}
+
+function render(){
+  renderChrome(); kpis();
+  const c = el("content");
+  if (tab === "Overall") c.innerHTML = overall();
+  else if (tab === "Market groups") c.innerHTML = marketTab();
+  else if (tab === "Tournaments") c.innerHTML = tournamentTab();
+  else if (tab === "Micro & live") c.innerHTML = microTab();
+  else if (tab === "Movement") c.innerHTML = movementTab();
+  else c.innerHTML = decileTab();
+  wireMetric();
+}
+render();
+</script>
+</body>
+</html>
